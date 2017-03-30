@@ -113,7 +113,8 @@ RUN echo "export VISIBLE=now" >> /etc/profile
 # Run the wrapper script first
 RUN apt-get update && apt-get install -y supervisor # Installing supervisord
 ADD supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-
+RUN adduser --disabled-password --gecos '' uttpal
+RUN echo 'uttpal:screencast' | chpasswd
 ENTRYPOINT ["/usr/bin/supervisord"]
 
 # Declare ports to expose

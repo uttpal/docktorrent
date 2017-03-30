@@ -90,8 +90,25 @@ COPY rootfs /
 RUN apt-get update && apt-get install -y --no-install-recommends vsftpd
 RUN apt-get clean
 
-RUN usermod -d /rtorrent ftp 
+RUN echo "local_enable=YES" >> /etc/vsftpd.conf
+RUN echo "chroot_local_user=YES" >> /etc/vsftpd.conf
+RUN echo "write_enable=YES" >> /etc/vsftpd.conf
+RUN echo "local_umask=022" >> /etc/vsftpd.conf
+RUN sed -i "s/anonymous_enable=YES/anonymous_enable=NO/" /etc/vsftpd.conf
+
 RUN mkdir -p /var/run/vsftpd/empty
+
+
+RUN apt-get update && apt-get install -y openssh-server
+RUN mkdir /var/run/sshd
+RUN echo 'root:screencast' | chpasswd
+RUN sed -i 's/PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
+
+# SSH login fix. Otherwise user is kicked off after login
+RUN sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd
+
+ENV NOTVISIBLE "in users profile"
+RUN echo "export VISIBLE=now" >> /etc/profile
 
 # Run the wrapper script first
 RUN apt-get update && apt-get install -y supervisor # Installing supervisord
@@ -100,7 +117,7 @@ ADD supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 ENTRYPOINT ["/usr/bin/supervisord"]
 
 # Declare ports to expose
-EXPOSE 80 9527 45566 21 4559 4560 4561 4562 4563 4564
+EXPOSE 22 80 9527 45566 21 4559 4560 4561 4562 4563 4564
 
 # Declare volumes
 VOLUME ["/rtorrent","/etc/vsftpd"]

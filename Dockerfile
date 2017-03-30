@@ -107,7 +107,6 @@ RUN chmod +x /entry.sh
 
 # Run the wrapper script first
 RUN apt-get update && apt-get install -y supervisor # Installing supervisord
-
 ADD supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 ENTRYPOINT ["/usr/bin/supervisord"]

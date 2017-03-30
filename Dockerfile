@@ -87,23 +87,16 @@ ADD s6-1.1.3.2-musl-static.tar.xz /
 # Service directories and the wrapper script
 COPY rootfs /
 
-RUN groupadd -g 48 ftp && \
-    useradd --no-create-home --home-dir /rtorrent -s /bin/false --uid 48 --gid 48 -c 'ftp daemon' ftp
+RUN apt-get update && apt-get install -y --no-install-recommends vsftpd
+RUN apt-get clean
 
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends vsftpd db5.3-util whois \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+RUN echo "local_enable=YES" >> /etc/vsftpd.conf
+RUN echo "chroot_local_user=YES" >> /etc/vsftpd.conf
+RUN echo "write_enable=YES" >> /etc/vsftpd.conf
+RUN echo "local_umask=022" >> /etc/vsftpd.conf
+RUN sed -i "s/anonymous_enable=YES/anonymous_enable=NO/" /etc/vsftpd.conf
 
-RUN mkdir -p /var/run/vsftpd/empty /etc/vsftpd/user_conf /var/ftp /rtorrent && \
-    touch /var/log/vsftpd.log && \
-    rm -rf /rtorrent/ftp
-
-COPY vsftpd*.conf /etc/
-COPY vsftpd_virtual /etc/pam.d/
-COPY *.sh /
-
-RUN chmod +x /entry.sh
+RUN mkdir -p /var/run/vsftpd/empty
 
 # Run the wrapper script first
 RUN apt-get update && apt-get install -y supervisor # Installing supervisord

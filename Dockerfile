@@ -88,22 +88,21 @@ ADD s6-1.1.3.2-musl-static.tar.xz /
 COPY rootfs /
 
 RUN groupadd -g 48 ftp && \
-    useradd --no-create-home --home-dir /srv -s /bin/false --uid 48 --gid 48 -c 'ftp daemon' ftp
+    useradd --no-create-home --home-dir /rtorrent -s /bin/false --uid 48 --gid 48 -c 'ftp daemon' ftp
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends vsftpd db5.3-util whois \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-RUN mkdir -p /var/run/vsftpd/empty /etc/vsftpd/user_conf /var/ftp /srv && \
+RUN mkdir -p /var/run/vsftpd/empty /etc/vsftpd/user_conf /var/ftp /rtorrent && \
     touch /var/log/vsftpd.log && \
-    rm -rf /srv/ftp
+    rm -rf /rtorrent/ftp
 
 COPY vsftpd*.conf /etc/
 COPY vsftpd_virtual /etc/pam.d/
 COPY *.sh /
 
-VOLUME ["/etc/vsftpd", "/srv"]
 
 # Run the wrapper script first
 RUN apt-get update && apt-get install -y supervisor # Installing supervisord
@@ -116,7 +115,7 @@ ENTRYPOINT ["/usr/bin/supervisord"]
 EXPOSE 80 9527 45566 21 4559 4560 4561 4562 4563 4564
 
 # Declare volumes
-VOLUME ["/rtorrent", "/var/log","/etc/vsftpd", "/srv"]
+VOLUME ["/rtorrent","/etc/vsftpd"]
 
 # This should be removed in the latest version of Docker
 ENV HOME /root

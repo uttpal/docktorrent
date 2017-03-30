@@ -106,7 +106,7 @@ COPY *.sh /
 VOLUME ["/etc/vsftpd", "/srv"]
 
 # Run the wrapper script first
-RUN apt-get install -y supervisor # Installing supervisord
+RUN apt-get update && apt-get install -y supervisor # Installing supervisord
 
 ADD supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 

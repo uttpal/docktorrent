@@ -103,6 +103,7 @@ COPY vsftpd*.conf /etc/
 COPY vsftpd_virtual /etc/pam.d/
 COPY *.sh /
 
+RUN chmod +x /entry.sh
 
 # Run the wrapper script first
 RUN apt-get update && apt-get install -y supervisor # Installing supervisord
